@@ -24,9 +24,18 @@ class Main():
         self.window_container.mainloop()
 
     def set_main_container(self):
-        self.window_container.geometry("650x400")
+        # self.window_container.geometry("650x400")
         self.window_container.title('Cheetah Detection')
         self.set_background()
+        self.center_window()
+
+    def center_window(self):
+        self.window_container.update_idletasks()
+        w = self.window_container.winfo_width()
+        h = self.window_container.winfo_height()
+        x = (self.window_container.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.window_container.winfo_screenheight() // 2) - (h // 2)
+        self.window_container.geometry('{}x{}+{}+{}'.format(w, h, x, y))
 
     def set_background(self):
         bg_image = Image.open('./img/background.png')
