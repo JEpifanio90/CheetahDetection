@@ -24,7 +24,9 @@ class Main():
         self.window_container.mainloop()
 
     def set_main_container(self):
-        # self.window_container.geometry("650x400")
+        icon = Image.open('./img/icon.png')
+        icon = ImageTk.PhotoImage(icon)
+        self.window_container.tk.call('wm', 'iconphoto', self.window_container._w, icon)
         self.window_container.title('Cheetah Detection')
         self.set_background()
         self.center_window()
