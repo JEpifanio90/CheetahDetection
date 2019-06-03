@@ -1,6 +1,6 @@
 {
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
-    "python.pythonPath": "C:\\Users\\josee\\AppData\\Local\\conda\\conda\\envs\\imgDetection\\python.exe",
+    "python.pythonPath": "C:\\Users\\josee\\.conda\\envs\\cheetahDetection\\python.exe",
     "python.linting.pep8Enabled": true
 }
