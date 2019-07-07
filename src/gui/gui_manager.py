@@ -99,18 +99,19 @@ class GuiManager():
         self.right_canvas.pack(fill='both')
 
     def add_buttons(self):
-        start_btn = Button(
+        self.start_btn = Button(
             self.btm_frame,
+            state='disabled',
             text='Start!',
             command=self.btn_callback
         )
-        start_btn.pack(fill='both', pady='20')
-        load_btn = Button(
+        self.start_btn.pack(fill='both', pady='20')
+        self.load_btn = Button(
             self.btm_frame,
             text='Load Image',
             command=self.btn_callback
         )
-        load_btn.pack(fill='both', pady='20')
+        self.load_btn.pack(fill='both', pady='20')
 
     def btn_callback(self):
         image_file = filedialog.askopenfile(
@@ -126,7 +127,7 @@ class GuiManager():
 
     def process_image(self, image_path):
         cropper = Cropper()
-        base_width = 400
+        base_width = 600
         cropper.crop_image(image_path.name)
         image = Image.open('./img/cropped.png')
         height = image.height * (base_width // image.width)
@@ -138,3 +139,5 @@ class GuiManager():
             image.height() // 2,
             image=self.usr_imgs['left']
         )
+        self.load_btn['state'] = 'disabled'
+        self.start_btn['state'] = 'normal'
