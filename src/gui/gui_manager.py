@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8
 from pathlib import Path
+from PIL import ImageTk, Image
 from tkinter import Tk
 from tkinter import Label, Button, StringVar, Canvas, Frame, filedialog
-from PIL import Image, ImageTk
+from utils.Cropper import Cropper
+import PIL
+import cv2
 import pdb
 import os
 """
@@ -24,6 +28,10 @@ __status__ = 'Development'
 class GuiManager():
     def __init__(self):
         self.window = Tk()
+        self.usr_imgs = {
+            'left': None,
+            'right': None
+        }
 
     def init_view(self):
         self.set_main_container()
@@ -68,7 +76,7 @@ class GuiManager():
             relief='flat'
         )
         usr_lbl_title.set('Your selected Image')
-        usr_lbl.pack(side='left', fill='both', padx=220)
+        usr_lbl.pack(side='left', fill='both', padx=200)
 
         out_lbl_title = StringVar()
         out_lbl = Label(
@@ -77,34 +85,56 @@ class GuiManager():
             relief='flat'
         )
         out_lbl_title.set('Output Image')
-        out_lbl.pack(side='right', fill='both', padx=220)
+        out_lbl.pack(side='right', fill='both', padx=200)
 
     def add_img_frames(self):
-        usr_canva = Canvas(self.left_frame, bg='red', relief='raised')
-        usr_canva.pack(fill='both', padx=20, pady=50)
+        self.left_canvas = Canvas(self.left_frame, bg='green', relief='raised')
+        self.left_canvas.pack(fill='both')
 
-        out_canva = Canvas(
+        self.right_canvas = Canvas(
             self.right_frame,
             bg='blue',
             relief='raised'
         )
-        out_canva.pack(fill='both', padx=20, pady=50)
+        self.right_canvas.pack(fill='both')
 
     def add_buttons(self):
-        load_btn = Button(self.btm_frame, text='Load Image',
-                          command=self.btn_callback)
-        load_btn.pack(side='left', padx=25)
-        snip_btn = Button(self.btm_frame, text='Snip Image',
-                          command=self.btn_callback)
-        snip_btn.pack(side='left', padx=25)
-        start_btn = Button(self.btm_frame, text='Start!',
-                           command=self.btn_callback)
-        start_btn.pack(side='left', padx=25)
-        cls_btn = Button(self.btm_frame, text='Clear',
-                         command=self.btn_callback)
-        cls_btn.pack(side='left', padx=25)
+        start_btn = Button(
+            self.btm_frame,
+            text='Start!',
+            command=self.btn_callback
+        )
+        start_btn.pack(fill='both', pady='20')
+        load_btn = Button(
+            self.btm_frame,
+            text='Load Image',
+            command=self.btn_callback
+        )
+        load_btn.pack(fill='both', pady='20')
 
     def btn_callback(self):
-        image_file = filedialog.askopenfile(initialdir=os.getcwd(), filetypes=(
-            ("JPEG", ".jpg"), ("PNG", ".png"), ("All Files", "*.*")))
-        image = ImageTk.PhotoImage(Image.open(image_file.name))
+        image_file = filedialog.askopenfile(
+            initialdir=os.getcwd(),
+            filetypes=(
+                ("All Files", "*.*"),
+                ("GIF", ".jpg"),
+                ("JPEG", ".jpg"),
+                ("PNG", ".png"),
+            )
+        )
+        self.process_image(image_file)
+
+    def process_image(self, image_path):
+        cropper = Cropper()
+        base_width = 400
+        cropper.crop_image(image_path.name)
+        image = Image.open('./img/cropped.png')
+        height = image.height * (base_width // image.width)
+        image = image.resize((base_width, height), PIL.Image.ANTIALIAS)
+        image = ImageTk.PhotoImage(image)
+        self.usr_imgs['left'] = image
+        self.left_canvas.create_image(
+            image.width() // 2,
+            image.height() // 2,
+            image=self.usr_imgs['left']
+        )

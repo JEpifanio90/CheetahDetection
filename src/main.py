@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8
 from gui.gui_manager import GuiManager
 '''Simple Image Classification. A bare bone Machine Learning implementation.
 
