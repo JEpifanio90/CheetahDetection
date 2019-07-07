@@ -5,13 +5,16 @@ from PIL import ImageTk, Image
 from tkinter import Tk
 from tkinter import Label, Button, StringVar, Canvas, Frame, filedialog
 from utils.cropper import Cropper
+from utils.filters import Filters
+from utils.matcher import Matcher
+from utils.img_utils import ImgUtils
 import PIL
 import cv2
 import pdb
 import os
-"""
+'''
     GUI Class Manager that initalizes the actual window
-"""
+'''
 _author__ = 'Jose Epifanio'
 __credits__ = [
     'Ludim Sanchez',
@@ -99,6 +102,12 @@ class GuiManager():
         self.right_canvas.pack(fill='both')
 
     def add_buttons(self):
+        self.match_btn = Button(
+            self.btm_frame,
+            state='disabled',
+            text='Match: 0.0%',
+        )
+        self.match_btn.pack(fill='both', pady='20')
         self.start_btn = Button(
             self.btm_frame,
             state='disabled',
@@ -112,18 +121,49 @@ class GuiManager():
             command=self.load_img
         )
         self.load_btn.pack(fill='both', pady='20')
+        self.clear_btn = Button(
+            self.btm_frame,
+            state='disabled',
+            text='Clear!',
+            command=self.clear
+        )
+        self.clear_btn.pack(fill='both', pady='20')
 
     def compare_images(self):
-        print('Comparing')
+        self.remove_textures(['l', 'r'])
+        matcher = Matcher()
+        print(matcher.compare('./img/laplacianl.png', './img/laplacianr.png'))
+
+    def remove_textures(self, sides):
+        filters = Filters()
+        filters.apply_filters(sides)
+        for side in sides:
+            img_container = 'left' if side == 'l' else 'right'
+            self.usr_imgs[img_container] = ImageTk.PhotoImage(
+                ImgUtils().resize(cv2.imread(f'./img/laplacian{side}.png'), 400, 400)  # nopep8
+            )
+
+            if img_container == 'left':
+                self.left_canvas.create_image(
+                    self.usr_imgs[img_container].width() // 2,
+                    self.usr_imgs[img_container].height() // 2,
+                    image=self.usr_imgs[img_container]
+                )
+            else:
+                self.right_canvas.create_image(
+                    self.usr_imgs[img_container].width() // 2,
+                    self.usr_imgs[img_container].height() // 2,
+                    image=self.usr_imgs[img_container]
+                )
 
     def load_img(self):
         image_file = filedialog.askopenfile(
             initialdir=os.getcwd(),
             filetypes=(
-                ("All Files", "*.*"),
-                ("GIF", ".jpg"),
-                ("JPEG", ".jpg"),
-                ("PNG", ".png"),
+                ('All Files', '*.*'),
+                ('GIF', '.jpg'),
+                ('JPEG', '.jpg'),
+                ('PNG', '.png'),
             )
         )
         self.process_image(image_file)
@@ -132,8 +172,10 @@ class GuiManager():
         cropper = Cropper()
         side = 'left' if self.usr_imgs['left'] is None else 'right'
         cropper.crop_image(image_path.name, side)
-        img_path = './img/croppedl.png' if self.usr_imgs['left'] is None else './img/croppedr.png'
-        image = self.resize_img(Image.open(img_path))
+        img_path = './img/croppedl.png' if self.usr_imgs['left'] is None else './img/croppedr.png'  # nopep8
+        image = ImageTk.PhotoImage(
+            ImgUtils().resize(cv2.imread(image_path), 400, 400)
+        )
 
         self.usr_imgs[side] = image
         if side == 'left':
@@ -150,11 +192,8 @@ class GuiManager():
             )
 
         self.start_btn['state'] = 'normal'
+        self.clear_btn['state'] = 'normal'
 
-    def resize_img(self, img):
-        base_width = 600
-        height = img.height * (base_width // img.width)
-        img = img.resize((base_width, height), PIL.Image.ANTIALIAS)
-        img = ImageTk.PhotoImage(img)
-
-        return img
+    def clear(self):
+        self.usr_imgs['left'], self.usr_imgs['righ'] = None, None
+        self.match_btn.text = 'Match: 0.0%'

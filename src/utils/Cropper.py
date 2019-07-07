@@ -70,7 +70,7 @@ class Cropper:
                     )
 
                     new_img = get_cropped_img(Image.open(path))
-                    img_url = './img/croppedl.png' if side == 'left' else './img/croppedr.png'
+                    img_url = './img/croppedl.png' if side == 'left' else './img/croppedr.png'  # nopep8
                     new_img.save(img_url, new_img.format)
 
             img = cv2.imread(path)
