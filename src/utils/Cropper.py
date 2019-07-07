@@ -23,11 +23,33 @@ __status__ = 'Development'
 
 class Cropper:
 
-    def crop_image(self, path):
+    def crop_image(self, path, side):
         crop_coords = []
         cropping_mode = False
         img = None
         try:
+            def get_cropped_img(img):
+                img_matrix = img.load()
+                newImg = Image.new(
+                    img.mode,
+                    (
+                        (crop_coords[1][0] - crop_coords[0][0]),
+                        (crop_coords[1][1] - crop_coords[0][1])
+                    )
+                )
+                x = 0
+                for i in range(crop_coords[0][0], crop_coords[1][0]):
+                    y = 0
+                    for j in range(crop_coords[0][1], crop_coords[1][1]):
+                        r = img_matrix[i, j][0]
+                        g = img_matrix[i, j][1]
+                        b = img_matrix[i, j][2]
+                        gray = (r+g+b) // 3
+                        newImg.putpixel((x, y), (gray, gray, gray))
+                        y = y + 1
+                    x = x + 1
+                return newImg
+
             def click_and_crop(event, x, y, flags, param):
                 nonlocal crop_coords, cropping_mode
 
@@ -47,34 +69,16 @@ class Cropper:
                         0
                     )
 
-                    imagePil = Image.open(path)
-                    img_matrix = imagePil.load()
-                    newImg = Image.new(
-                        imagePil.mode,
-                        (
-                            (crop_coords[1][0] - crop_coords[0][0]),
-                            (crop_coords[1][1] - crop_coords[0][1])
-                        )
-                    )
-                    x = 0
-                    for i in range(crop_coords[0][0], crop_coords[1][0]):
-                        y = 0
-                        for j in range(crop_coords[0][1], crop_coords[1][1]):
-                            r = img_matrix[i, j][0]
-                            g = img_matrix[i, j][1]
-                            b = img_matrix[i, j][2]
-                            gray = (r+g+b) // 3
-                            newImg.putpixel((x, y), (gray, gray, gray))
-                            y = y + 1
-                        x = x + 1
-                    newImg.save("./img/cropped.png", imagePil.format)
+                    new_img = get_cropped_img(Image.open(path))
+                    img_url = './img/croppedl.png' if side == 'left' else './img/croppedr.png'
+                    new_img.save(img_url, new_img.format)
 
             img = cv2.imread(path)
             img = cv2.resize(img, (400, 400))
             clone = img.copy()
 
             cv2.namedWindow('Crop Your Image')
-            cv2.setMouseCallback("Crop Your Image", click_and_crop)
+            cv2.setMouseCallback('Crop Your Image', click_and_crop)
 
             while True:
                 cv2.imshow('Crop Your Image', img)
@@ -85,5 +89,9 @@ class Cropper:
                 elif key == ord('c'):
                     break
             cv2.destroyAllWindows()
+        except FileNotFoundError:
+            print('Hey! The uploaded image doesn't exists')
+        except Exception:
+            print('Somewhere in these lines I screwed up... proly ln 75')
         except:
-            print('You didn\'t choose an Image')
+            print('Try gain (?)')

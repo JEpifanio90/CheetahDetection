@@ -103,17 +103,20 @@ class GuiManager():
             self.btm_frame,
             state='disabled',
             text='Start!',
-            command=self.btn_callback
+            command=self.compare_images
         )
         self.start_btn.pack(fill='both', pady='20')
         self.load_btn = Button(
             self.btm_frame,
             text='Load Image',
-            command=self.btn_callback
+            command=self.load_img
         )
         self.load_btn.pack(fill='both', pady='20')
 
-    def btn_callback(self):
+    def compare_images(self):
+        print('Comparing')
+
+    def load_img(self):
         image_file = filedialog.askopenfile(
             initialdir=os.getcwd(),
             filetypes=(
@@ -127,17 +130,31 @@ class GuiManager():
 
     def process_image(self, image_path):
         cropper = Cropper()
-        base_width = 600
-        cropper.crop_image(image_path.name)
-        image = Image.open('./img/cropped.png')
-        height = image.height * (base_width // image.width)
-        image = image.resize((base_width, height), PIL.Image.ANTIALIAS)
-        image = ImageTk.PhotoImage(image)
-        self.usr_imgs['left'] = image
-        self.left_canvas.create_image(
-            image.width() // 2,
-            image.height() // 2,
-            image=self.usr_imgs['left']
-        )
-        self.load_btn['state'] = 'disabled'
+        side = 'left' if self.usr_imgs['left'] is None else 'right'
+        cropper.crop_image(image_path.name, side)
+        img_path = './img/croppedl.png' if self.usr_imgs['left'] is None else './img/croppedr.png'
+        image = self.resize_img(Image.open(img_path))
+
+        self.usr_imgs[side] = image
+        if side == 'left':
+            self.left_canvas.create_image(
+                image.width() // 2,
+                image.height() // 2,
+                image=self.usr_imgs[side]
+            )
+        else:
+            self.right_canvas.create_image(
+                image.width() // 2,
+                image.height() // 2,
+                image=self.usr_imgs[side]
+            )
+
         self.start_btn['state'] = 'normal'
+
+    def resize_img(self, img):
+        base_width = 600
+        height = img.height * (base_width // img.width)
+        img = img.resize((base_width, height), PIL.Image.ANTIALIAS)
+        img = ImageTk.PhotoImage(img)
+
+        return img
