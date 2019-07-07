@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import ImageTk, Image
 from tkinter import Tk
 from tkinter import Label, Button, StringVar, Canvas, Frame, filedialog
-from utils.Cropper import Cropper
+from utils.cropper import Cropper
 import PIL
 import cv2
 import pdb

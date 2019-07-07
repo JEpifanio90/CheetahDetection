@@ -90,7 +90,7 @@ class Cropper:
                     break
             cv2.destroyAllWindows()
         except FileNotFoundError:
-            print('Hey! The uploaded image doesn't exists')
+            print('Hey! The uploaded image doesn\'t exists')
         except Exception:
             print('Somewhere in these lines I screwed up... proly ln 75')
         except:
