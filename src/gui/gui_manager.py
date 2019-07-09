@@ -10,7 +10,6 @@ from utils.matcher import Matcher
 from utils.img_utils import ImgUtils
 import PIL
 import cv2
-import pdb
 import os
 '''
     GUI Class Manager that initalizes the actual window
@@ -139,9 +138,7 @@ class GuiManager():
         filters.apply_filters(sides)
         for side in sides:
             img_container = 'left' if side == 'l' else 'right'
-            self.usr_imgs[img_container] = ImageTk.PhotoImage(
-                ImgUtils().resize(cv2.imread(f'./img/laplacian{side}.png'), 400, 400)  # nopep8
-            )
+            self.usr_imgs[img_container] = self.resize_img(Image.open(f'./img/laplacian{side}.png'))
 
             if img_container == 'left':
                 self.left_canvas.create_image(
@@ -173,9 +170,7 @@ class GuiManager():
         side = 'left' if self.usr_imgs['left'] is None else 'right'
         cropper.crop_image(image_path.name, side)
         img_path = './img/croppedl.png' if self.usr_imgs['left'] is None else './img/croppedr.png'  # nopep8
-        image = ImageTk.PhotoImage(
-            ImgUtils().resize(cv2.imread(image_path), 400, 400)
-        )
+        image = self.resize_img(Image.open(img_path))
 
         self.usr_imgs[side] = image
         if side == 'left':
@@ -193,6 +188,14 @@ class GuiManager():
 
         self.start_btn['state'] = 'normal'
         self.clear_btn['state'] = 'normal'
+
+    def resize_img(self, img):
+        base_width = 600
+        height = img.height * (base_width // img.width)
+        img = img.resize((base_width, height), PIL.Image.ANTIALIAS)
+        img = ImageTk.PhotoImage(img)
+
+        return img
 
     def clear(self):
         self.usr_imgs['left'], self.usr_imgs['righ'] = None, None
